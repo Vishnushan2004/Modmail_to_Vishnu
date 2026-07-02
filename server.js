@@ -98,6 +98,7 @@ app.post('/api/webhook', async (req, res) => {
       });
       return res.status(200).send('ok');
     }
+    // Handle other commands if needed
 
     await call('sendMessage', {
       chat_id: ADMIN_ID,
