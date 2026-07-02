@@ -91,24 +91,24 @@ app.post('/api/webhook', async (req, res) => {
     const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Unknown';
     const username = user.username ? `@${user.username}` : 'no username';
 
-    if (message.text === '/start') {
-      await call('sendMessage', {
-        chat_id: chatId,
-        text: `
-    👋 Hi ${name}! I am Bruce, 
-    If you have any questions, encounter an issue, or would like to share feedback, simply send us a message. Our support team will respond as soon as possible.
-        
-    ⚠️ Before contacting support, please make sure you're using our official Signals Bot:
-    @Falcon_Crypto_Signals_bot
+// Welcome message
+if (message.text === "/start") {
+  await call("sendMessage", {
+    chat_id: chatId,
+    text: `👋 Hi ${name}!
 
-    🚀 We're here to help!
+Welcome to the official Falcon Crypto Signals Support Bot.
 
-`
-        
-        ,
-      });
-      return res.status(200).send('ok');
-    }
+If you have any questions, encounter an issue, or would like to share feedback, simply send us a message. Our support team will respond as soon as possible.
+
+⚠️ Before contacting support, please make sure you're using our official Signals Bot:
+@Falcon_Crypto_Signals_bot
+
+🚀 We're here to help!`,
+  });
+
+  return res.status(200).send("ok");
+}
     // Handle other commands if needed
 
     await call('sendMessage', {
