@@ -1,0 +1,9 @@
+{
+  "name": "telegram-relay-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Telegram bot that relays DMs to an admin and lets them reply, no database.",
+  "engines": {
+    "node": ">=18"
+  }
+}
