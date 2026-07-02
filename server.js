@@ -1,5 +1,5 @@
-// api/webhook.js
-// Telegram "contact relay" bot — no database needed.
+// server.js
+// Telegram "contact relay" bot — no database needed. Railway-compatible (long-running server).
 //
 // Flow:
 // 1. A user messages your bot privately.
@@ -9,22 +9,28 @@
 // 4. Bot detects the reply, figures out who to send it to, and delivers it —
 //    feels like a live chat, with zero storage.
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(200).send('Bot is running ✅');
-  }
+import express from 'express';
 
-  const BOT_TOKEN = process.env.BOT_TOKEN;
-  const ADMIN_ID = process.env.ADMIN_ID;
-  const API = `https://api.telegram.org/bot${BOT_TOKEN}`;
+const app = express();
+app.use(express.json());
 
-  const call = (method, payload) =>
-    fetch(`${API}/${method}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    }).then((r) => r.json());
+const BOT_TOKEN = process.env.BOT_TOKEN;
+const ADMIN_ID = process.env.ADMIN_ID;
+const API = `https://api.telegram.org/bot${BOT_TOKEN}`;
+const PORT = process.env.PORT || 3000;
 
+const call = (method, payload) =>
+  fetch(`${API}/${method}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  }).then((r) => r.json());
+
+app.get('/', (req, res) => {
+  res.send('Bot is running ✅');
+});
+
+app.post('/api/webhook', async (req, res) => {
   try {
     const update = req.body;
     const message = update?.message;
@@ -38,7 +44,6 @@ export default async function handler(req, res) {
       const replyTo = message.reply_to_message;
 
       if (!replyTo) {
-        // Not a reply — just remind how it works.
         await call('sendMessage', {
           chat_id: ADMIN_ID,
           text:
@@ -47,14 +52,11 @@ export default async function handler(req, res) {
         return res.status(200).send('ok');
       }
 
-      // Try to find who the original sender was.
       let targetId = null;
 
       if (replyTo.forward_from) {
-        // Works when the user's privacy settings allow showing forward origin.
         targetId = replyTo.forward_from.id;
       } else {
-        // Fallback: parse the ID we embedded in our own header/caption text.
         const text = replyTo.text || replyTo.caption || '';
         const match = text.match(/🆔\s*ID:\s*(\d+)/);
         if (match) targetId = match[1];
@@ -97,13 +99,11 @@ export default async function handler(req, res) {
       return res.status(200).send('ok');
     }
 
-    // 1) Info header so you always know who it is + their numeric ID (fallback for replies)
     await call('sendMessage', {
       chat_id: ADMIN_ID,
       text: `📩 New message from ${name} (${username})\n🆔 ID: ${user.id}`,
     });
 
-    // 2) The actual message, forwarded (keeps forward_from metadata when available)
     const fwd = await call('forwardMessage', {
       chat_id: ADMIN_ID,
       from_chat_id: chatId,
@@ -111,7 +111,6 @@ export default async function handler(req, res) {
     });
 
     if (!fwd.ok) {
-      // Extremely rare fallback (e.g. some restricted content) — copy instead.
       await call('copyMessage', {
         chat_id: ADMIN_ID,
         from_chat_id: chatId,
@@ -122,7 +121,10 @@ export default async function handler(req, res) {
     return res.status(200).send('ok');
   } catch (err) {
     console.error(err);
-    // Always 200 so Telegram doesn't hammer retries.
     return res.status(200).send('error handled');
   }
-}
+});
+
+app.listen(PORT, () => {
+  console.log(`Bot server listening on port ${PORT}`);
+});
