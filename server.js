@@ -99,16 +99,15 @@ app.post('/api/webhook', async (req, res) => {
         chat_id: chatId,
         parse_mode: 'HTML',
         text:
-          `👋 <b>Hi ${escapeHtml(name)}!\n\n` +
-          `Welcome to the official <b>Falcon Crypto Signals Helper Bot.\n\n` +
-          `If you have any questions, encounter an issue, or would like to share feedback\n\n`
-          `Simply send Your message here. Our support team will respond as soon as possible.\n\n` +
+          `👋 <b>Hi ${escapeHtml(name)}!</b>\n\n` +
+          `Welcome to the official <b>Falcon Crypto Signals Support Bot</b>.\n\n` +
+          `If you have any questions, encounter an issue, or would like to share feedback, simply send us a message here. Our support team will respond as soon as possible.\n\n` +
           `⚠️ <i>Before contacting support, please make sure you're using our official Signals Bot:</i>\n` +
           `👉 @Falcon_Crypto_Signals_bot\n\n` +
-          `🚀 We're here to help!</b>`,
+          `🚀 We're here to help!`,
         reply_markup: {
           inline_keyboard: [
-            [{ text: '🦅 Official Falcon Crypto Signals', url: 'https://t.me/Falcon_Crypto_Signals_bot' }],
+            [{ text: '📡 Official Signals Bot', url: 'https://t.me/Falcon_Crypto_Signals_bot' }],
           ],
         },
       });
