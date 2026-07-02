@@ -94,7 +94,17 @@ app.post('/api/webhook', async (req, res) => {
     if (message.text === '/start') {
       await call('sendMessage', {
         chat_id: chatId,
-        text: "👋 Hi! Send me a message and I'll pass it along. You'll get a reply here.",
+        text: `👋 Hi ${name}! I am Bruce, 
+        If you have any questions, encounter an issue, or would like to share feedback, simply send us a message. Our support team will respond as soon as possible.
+        
+        ⚠️ Before contacting support, please make sure you're using our official Signals Bot:
+        @Falcon_Crypto_Signals_bot
+
+        🚀 We're here to help!
+
+`
+        
+        ,
       });
       return res.status(200).send('ok');
     }
