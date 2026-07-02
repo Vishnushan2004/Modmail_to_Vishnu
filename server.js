@@ -26,6 +26,9 @@ const call = (method, payload) =>
     body: JSON.stringify(payload),
   }).then((r) => r.json());
 
+const escapeHtml = (str = '') =>
+  str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
 app.get('/', (req, res) => {
   res.send('Bot is running ✅');
 });
@@ -91,25 +94,25 @@ app.post('/api/webhook', async (req, res) => {
     const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Unknown';
     const username = user.username ? `@${user.username}` : 'no username';
 
-// Welcome message
-if (message.text === "/start") {
-  await call("sendMessage", {
-    chat_id: chatId,
-    text: `👋 Hi ${name}!
-
-Welcome to the official Falcon Crypto Signals Support Bot.
-
-If you have any questions, encounter an issue, or would like to share feedback, simply send us a message. Our support team will respond as soon as possible.
-
-⚠️ Before contacting support, please make sure you're using our official Signals Bot:
-@Falcon_Crypto_Signals_bot
-
-🚀 We're here to help!`,
-  });
-
-  return res.status(200).send("ok");
-}
-    // Handle other commands if needed
+    if (message.text === '/start') {
+      await call('sendMessage', {
+        chat_id: chatId,
+        parse_mode: 'HTML',
+        text:
+          `👋 <b>Hi ${escapeHtml(name)}!</b>\n\n` +
+          `Welcome to the official <b>Falcon Crypto Signals Support Bot</b>.\n\n` +
+          `If you have any questions, encounter an issue, or would like to share feedback, simply send us a message here. Our support team will respond as soon as possible.\n\n` +
+          `⚠️ <i>Before contacting support, please make sure you're using our official Signals Bot:</i>\n` +
+          `👉 @Falcon_Crypto_Signals_bot\n\n` +
+          `🚀 We're here to help!`,
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '📡 Official Signals Bot', url: 'https://t.me/Falcon_Crypto_Signals_bot' }],
+          ],
+        },
+      });
+      return res.status(200).send('ok');
+    }
 
     await call('sendMessage', {
       chat_id: ADMIN_ID,
@@ -137,6 +140,8 @@ If you have any questions, encounter an issue, or would like to share feedback, 
   }
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Bot server listening on port ${PORT}`);
+  if (!BOT_TOKEN) console.warn('⚠️  BOT_TOKEN is not set!');
+  if (!ADMIN_ID) console.warn('⚠️  ADMIN_ID is not set!');
 });
