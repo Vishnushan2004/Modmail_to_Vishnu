@@ -95,13 +95,13 @@ app.post('/api/webhook', async (req, res) => {
 if (message.text === "/start") {
   await call("sendMessage", {
     chat_id: chatId,
-    text: `👋 Hi ${name}!
+    text: `<b>👋 Hi ${name}!
 
 Welcome to the official Falcon Crypto Signals Support Bot.
 
 If you have any questions, encounter an issue, or would like to share feedback, simply send us a message. Our support team will respond as soon as possible.
 
-🚀 We're here to help!`,
+🚀 We're here to help!</b>`,
   });
 
   return res.status(200).send("ok");
