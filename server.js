@@ -91,36 +91,18 @@ app.post('/api/webhook', async (req, res) => {
     const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Unknown';
     const username = user.username ? `@${user.username}` : 'no username';
 
-// Welcome message
-if (message.text === "/start") {
-  await call("sendMessage", {
-    chat_id: chatId,
-    text: `👋 Hi ${name}!
+    if (message.text === '/start') {
+      await call('sendMessage', {
+        chat_id: chatId,
+        text: "👋 Hi! Send me a message and I'll pass it along. You'll get a reply here.",
+      });
+      return res.status(200).send('ok');
+    }
 
-Welcome to the official Falcon Crypto Signals Support Bot.
-
-⚠️ Before contacting support, please make sure you're using our official Signals Bot:
-@Falcon_Crypto_Signals_bot
-
-If you have any questions, encounter an issue, or would like to share feedback, simply send us a message. Our support team will respond as soon as possible.
-
-🚀 We're here to help!`,
-  });
-
-  return res.status(200).send("ok");
-}
-
-// Notify admin about a new conversation
-await call("sendMessage", {
-  chat_id: ADMIN_ID,
-  text: `📩 New Support Message
-
-👤 Name: ${name}
-🔗 Username: ${username ? `@${username}` : "Not set"}
-🆔 User ID: ${user.id}
-
-💬 Message:`,
-});
+    await call('sendMessage', {
+      chat_id: ADMIN_ID,
+      text: `📩 New message from ${name} (${username})\n🆔 ID: ${user.id}`,
+    });
 
     const fwd = await call('forwardMessage', {
       chat_id: ADMIN_ID,
