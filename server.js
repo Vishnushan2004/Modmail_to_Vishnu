@@ -94,7 +94,7 @@ app.post('/api/webhook', async (req, res) => {
     if (message.text === '/start') {
       await call('sendMessage', {
         chat_id: chatId,
-        text: "👋 Hi! Send me a message and I'll pass it along. You'll get a reply here.",
+        text: `👋 Hi ${name}! Send me a message and I'll pass it along. You'll get a reply here.`,
       });
       return res.status(200).send('ok');
     }
