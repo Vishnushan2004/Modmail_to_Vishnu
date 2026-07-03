@@ -107,16 +107,21 @@ export default async function handler(req, res) {
       await call('sendMessage', {
         chat_id: chatId,
         parse_mode: 'HTML',
-        text: `👋 <b>Hi ${name}!</b>
+        text: `👋 Hi ${name}, great to meet you!
 
-<b>I am Bruce, The official Helper Bot of Falcon Crypto Signals </b>.
+I'm <b>Bruce</b> 🤖 — the official support bot for <b>Falcon Crypto Signals</b>.
 
-<b>If you have any questions, encounter an issue, or would like to share feedback, simply Send your message here. Our support team will respond as soon as possible.</b>
+Here's what I can do for you:
+🔹 Answer questions about our signals & service
+🔹 Pass along any issue or bug straight to our team
+🔹 Collect feedback or suggestions you want us to hear
 
-⚠️ <b>Before contacting support</b>, please make sure you're using our official Signals Bot:
+Just type your message below like you're texting a friend — I'll deliver it to our support team, and bring their reply right back to this chat. No forms, no tickets, no waiting on hold.
+
+⚠️ One quick check before you go: make sure you're chatting with our real signals bot too:
 👉 <a href="https://t.me/Falcon_Crypto_Signals_bot">@Falcon_Crypto_Signals_bot</a>
 
-🚀 We're here to help!`,
+🚀 Go ahead, send your message — I'm listening!`,
       });
       return res.status(200).send('ok');
     }
