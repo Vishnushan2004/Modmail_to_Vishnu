@@ -102,10 +102,16 @@ export default async function handler(req, res) {
     const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Unknown';
     const username = user.username ? `@${user.username}` : 'no username';
 
+    // Welcome message
     if (message.text === '/start') {
       await call('sendMessage', {
         chat_id: chatId,
-        text: "👋 Hi! Send me a message and I'll pass it along. You'll get a reply here.",
+        text: `👋 Hi ${name}!
+Welcome to the official Falcon Crypto Signals Support Bot.
+If you have any questions, encounter an issue, or would like to share feedback, simply send us a message. Our support team will respond as soon as possible.
+⚠️ Before contacting support, please make sure you're using our official Signals Bot:
+@Falcon_Crypto_Signals_bot
+🚀 We're here to help!`,
       });
       return res.status(200).send('ok');
     }
