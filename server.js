@@ -109,7 +109,7 @@ app.post('/api/webhook', async (req, res) => {
         reply_markup: {
           inline_keyboard: [
             [{ text: '🦅 Official Falcon Crypto Signals Bot', url: 'https://t.me/Falcon_Crypto_Signals_bot' }],
-          ],
+          ], 
         },
       });
       return res.status(200).send('ok');
