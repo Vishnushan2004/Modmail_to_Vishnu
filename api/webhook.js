@@ -109,9 +109,9 @@ export default async function handler(req, res) {
         parse_mode: 'HTML',
         text: `👋 <b>Hi ${name}!</b>
 
-I am Bruce,The official Helper Bot of<b>Falcon Crypto Signals </b>.
+<b>I am Bruce, The official Helper Bot of Falcon Crypto Signals </b>.
 
-If you have any questions, encounter an issue, or would like to share feedback, simply Send your message here. Our support team will respond as soon as possible.
+<b>If you have any questions, encounter an issue, or would like to share feedback, simply Send your message here. Our support team will respond as soon as possible.</b>
 
 ⚠️ <b>Before contacting support</b>, please make sure you're using our official Signals Bot:
 👉 <a href="https://t.me/Falcon_Crypto_Signals_bot">@Falcon_Crypto_Signals_bot</a>
