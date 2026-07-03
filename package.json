@@ -1,17 +1,9 @@
 {
-  "name": "telegram-relay-bot",
+  "name": "modmail-relay-bot",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
   "description": "Telegram bot that relays DMs to an admin and lets them reply, no database.",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
   "engines": {
     "node": ">=18"
-  },
-  "dependencies": {
-    "express": "^4.19.2"
   }
 }

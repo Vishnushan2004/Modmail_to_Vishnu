@@ -1,41 +1,49 @@
-// server.js
-// Telegram "contact relay" bot — no database needed. Railway-compatible (long-running server).
+// api/webhook.js
+// Telegram "modmail" relay bot — no database needed.
 //
 // Flow:
-// 1. A user messages your bot privately.
-// 2. Bot sends YOU (the admin) a small info header ("who this is + their ID"),
-//    then forwards their actual message right after it.
-// 3. You just hit "Reply" (in Telegram) on either of those messages and type your answer.
-// 4. Bot detects the reply, figures out who to send it to, and delivers it —
-//    feels like a live chat, with zero storage.
+// 1. A user DMs your bot.
+// 2. Bot sends YOU (the admin) a header ("who this is + their ID"), then
+//    forwards their actual message right after it.
+// 3. You hit "Reply" (in Telegram) on either message and type your answer.
+// 4. Bot detects the reply, works out who to send it to, and delivers it.
+//
+// This file logs every step to the Vercel function logs (Project → Deployments
+// → latest → Functions → webhook → Logs) so failures are visible instead of silent.
 
-import express from 'express';
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(200).send('Bot is running ✅');
+  }
 
-const app = express();
-app.use(express.json());
+  const BOT_TOKEN = process.env.BOT_TOKEN;
+  const ADMIN_ID = process.env.ADMIN_ID;
 
-const BOT_TOKEN = process.env.BOT_TOKEN;
-const ADMIN_ID = process.env.ADMIN_ID;
-const API = `https://api.telegram.org/bot${BOT_TOKEN}`;
-const PORT = process.env.PORT || 3000;
+  if (!BOT_TOKEN || !ADMIN_ID) {
+    console.error('Missing env vars', { hasToken: !!BOT_TOKEN, hasAdmin: !!ADMIN_ID });
+    // Still 200 so Telegram doesn't retry-storm us, but this is logged loudly.
+    return res.status(200).send('missing env vars — check /api/debug');
+  }
 
-const call = (method, payload) =>
-  fetch(`${API}/${method}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  }).then((r) => r.json());
+  const API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
-const escapeHtml = (str = '') =>
-  str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const call = async (method, payload) => {
+    const r = await fetch(`${API}/${method}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await r.json();
+    if (!data.ok) {
+      console.error(`Telegram API error on ${method}:`, data.description);
+    }
+    return data;
+  };
 
-app.get('/', (req, res) => {
-  res.send('Bot is running ✅');
-});
-
-app.post('/api/webhook', async (req, res) => {
   try {
     const update = req.body;
+    console.log('Incoming update:', JSON.stringify(update));
+
     const message = update?.message;
     if (!message) return res.status(200).send('ok');
 
@@ -75,7 +83,7 @@ app.post('/api/webhook', async (req, res) => {
         if (!result.ok) {
           await call('sendMessage', {
             chat_id: ADMIN_ID,
-            text: `⚠️ Couldn't deliver that reply (user may have blocked the bot). Telegram said: ${result.description}`,
+            text: `⚠️ Couldn't deliver that reply. Telegram said: ${result.description}`,
           });
         }
       } else {
@@ -97,20 +105,7 @@ app.post('/api/webhook', async (req, res) => {
     if (message.text === '/start') {
       await call('sendMessage', {
         chat_id: chatId,
-        parse_mode: 'HTML',
-        text:
-          `👋 <b>Hi ${escapeHtml(name)}!</b>\n\n` +
-          `I am Bruce, Support Bot of <b>Falcon Crypto Signals </b>.\n\n` +
-          `If you have any doubts, questions, encounter an issue, or would like to share feedback\n`
-          `send your message here. Our support Team will respond as soon as possible\n\n` +
-          `⚠️ <i>Before contacting support, please make sure you're using our official Signals Bot:</i>\n` +
-          `👉 @Falcon_Crypto_Signals_bot\n\n` +
-          `🚀 We're here to help!`,
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: '🦅 Official Falcon Crypto Signals Bot', url: 'https://t.me/Falcon_Crypto_Signals_bot' }],
-          ], 
-        },
+        text: "👋 Hi! Send me a message and I'll pass it along. You'll get a reply here.",
       });
       return res.status(200).send('ok');
     }
@@ -136,13 +131,7 @@ app.post('/api/webhook', async (req, res) => {
 
     return res.status(200).send('ok');
   } catch (err) {
-    console.error(err);
+    console.error('Handler crashed:', err);
     return res.status(200).send('error handled');
   }
-});
-
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Bot server listening on port ${PORT}`);
-  if (!BOT_TOKEN) console.warn('⚠️  BOT_TOKEN is not set!');
-  if (!ADMIN_ID) console.warn('⚠️  ADMIN_ID is not set!');
-});
+}
